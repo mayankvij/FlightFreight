@@ -167,37 +167,51 @@ namespace FlightFreight
 
         public static void ReadFile(List<schedule> sch)
         {
-            var path = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)+"\\data\\coding-assigment-orders.json";
-            using (StreamReader file = File.OpenText(path))
+            try
             {
-                string json = file.ReadToEnd();
-
-                var jObj = JObject.Parse(json);
-                var props = jObj.Properties().Select(x => ((JProperty)x).Name).ToList();
-           
-                string destination;
-                 
-                foreach (var prop in props)
+                var path = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\data\\coding-assigment-orders.json";
+                using (StreamReader file = File.OpenText(path))
                 {
-                    destination=jObj[prop]["destination"].ToString();
-                    schedule flight = sch.Where(x => x.destination == destination &&  x.capacity>0).FirstOrDefault();
-                    
-                    if(flight==null)
+                    string json = file.ReadToEnd();
+
+                    var jObj = JObject.Parse(json);
+                    var props = jObj.Properties().Select(x => ((JProperty)x).Name).ToList();
+
+                    string destination;
+
+                    foreach (var prop in props)
                     {
-                        Console.WriteLine("order: {0}, flightnumber: not scheduled", prop);
+                        destination = jObj[prop]["destination"].ToString();
+                        schedule flight = sch.Where(x => x.destination == destination && x.capacity > 0).FirstOrDefault();
+
+                        if (flight == null)
+                        {
+                            Console.WriteLine("order: {0}, flightnumber: not scheduled", prop);
+                        }
+                        else
+                        {
+                            Console.WriteLine("order: {0}, flightnumber: {1}, departure:{2}, arrival: {3}, day: {4}, capacity {5}", prop, flight.flightno, flight.origin, flight.destination, flight.day, flight.capacity);
+                            flight.capacity--;
+                        }
+
                     }
-                    else
-                    {
-                        Console.WriteLine("order: {0}, flightnumber: {1}, departure:{2}, arrival: {3}, day: {4}, capacity {5}", prop, flight.flightno, flight.origin, flight.destination, flight.day, flight.capacity);
-                        flight.capacity--;
-                    }
-                    
+                    Console.WriteLine("Flight Itineraries have been generated. Please press any key to go back to the menu.");
+                    Console.WriteLine("________________________________________________________________");
+                    Console.ReadLine();
                 }
-                Console.WriteLine("Flight Itineraries have been generated. Please press any key to go back to the menu.");
+            }
+            catch(FileNotFoundException ex)
+            {
+                Console.WriteLine("Please save the json file with filename \"coding-assigment-orders.json\". Press any key to go back to the menu. ");
                 Console.WriteLine("________________________________________________________________");
                 Console.ReadLine();
             }
-            
+            catch (DirectoryNotFoundException ex)
+            {
+                Console.WriteLine("Please save the json file in the bin folder in folder named \"Data\". Press any key to go back to the menu. ");
+                Console.WriteLine("________________________________________________________________");
+                Console.ReadLine();
+            }
         }
     }
     
